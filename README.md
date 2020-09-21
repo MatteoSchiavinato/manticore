@@ -1,3 +1,5 @@
+![GitHub Logo](logo.png)
+
 # Manticore
 
 #### <v1.0.0>
