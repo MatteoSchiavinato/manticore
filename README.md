@@ -58,6 +58,7 @@ The quick help shows the mandatory options first, which are the only ones actual
 Usage:
 manticore \
 --species-name STRING \
+--reads-type PE \
 --reads PATH1,PATH2 PATH3,PATH4 \
         (parentA)   (parentB)
 --names STRING STRING \
@@ -143,7 +144,12 @@ This word will be used as a prefix for many files throughout the analysis. It is
 
 `--reads`<br/>
 SPACE-separated list of paired-end read files. Each SPACE should separate reads from different parents, while the two read files (R1 and R2) of the same parent should be separated by a COMMA (without a following space). An example is provided here: Par_1.R1.fq,Par_1.R2.fq Par_2.R1.fq,Par_2.R2.fq
+In case of single-end reads, ignore the comma separation and only provide the two parental file separated by a space. 
 [mandatory]
+
+`--reads-type`<br/>
+Specify either 'SE' or 'PE' depending on if your reads are single-end or paired-end, respectively.
+[PE]
 
 `--names`<br/>
 SPACE-separated list of names to be attributed to the parental reads listed in `--reads`. The order of the names has to be the same of `--reads` (i.e. first name will be assigned to first pair of reads, and so on).
@@ -222,16 +228,14 @@ Heavy intermediate files are deleted when the program has finished running. This
 The reference file is filtered, keeping only sequences longer than the specified `--window-size`. This option has both pros and cons: parental reads originating from regions that are orthologous to the excluded sequences won't find their mapping target; however, there will be less sequences to analyse and this will speed up the analysis.
 [off]
 
-`--read-type`<br/>
-Specify 'PE' for paired-end or 'SE' for single-end reads.
-[PE]
-
 `--isize-read-num`<br/>
 Number of read pairs from which to estimate the insert size distribution. This number of reads will be mapped on the reference and used to draw an insert size distribution plot, which will then be used to define the peak insert size and the range of accepted insert sizes through `--isize-dist-width`.
+This option is ignored in case of single-end reads.
 [10000]
 
 `--isize-dist-width`<br/>
 Width of the allowed insert size range when mapping. The `--isize-read-num` option returns a peak insert size P. If a value of **N** is specified here, then this value is used in the following way: the -I and -X parameters of *HISAT2*, which control the insert size range, will be `P-N` and `P+N`, respectively. A wider width allows for more read pairs to be accepted as valid, but at the same time increases the chance of accepting wrongly mapped reads.
+This option is ignored in case of single-end reads.
 [150]
 
 `--hisat2-path`<br/>
