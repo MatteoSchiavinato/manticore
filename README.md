@@ -20,7 +20,7 @@ Manticore depends on a series of external resources, which are summarized in the
 |-|-|-|-|
 | Python | Language interpreter | ≥ 3.5 | https://www.python.org/downloads |
 | R | Language interpreter | ≥ 3.2.3 | https://www.r-project.org |
-| HISAT2 | Mapping program | ≥ 2.1.0 | https://github.com/DaehwanKimLab/hisat |
+| HISAT2 | Mapping program | ≥ 2.1.0 | https://github.com/DaehwanKimLab/hisat2 |
 | Biopython | Python package | ≥ 1.73 | python3.6 -m pip install biopython |
 | pysam | Python package | ≥ 0.15.3 | python3.6 -m pip install pysam |
 | numpy | Python package | ≥ 1.17.3 | python3.6 -m pip install numpy |
