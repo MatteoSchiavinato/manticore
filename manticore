@@ -53,6 +53,7 @@ if sys.argv[1] == "-h":
 Usage:
 manticore \\
 --species-name STRING \\
+--reads-type PE \\
 --reads PATH1,PATH2 PATH3,PATH4 \\
         (parentA)   (parentB)
 --names STRING STRING \\
@@ -65,6 +66,7 @@ manticore \\
 [INPUT OPTIONS]
   --species-name	Label for output files and plot titles			[required]
   --reads		FASTQ read files, see --help for how to structure	[required]
+  --reads-type		Type of the input reads (PE|SE) 			[PE]
   --names		Names of read files, see --help for how to structure	[required]
   --reference		Hybrid genome in FASTA format				[required]
   --output-dir		Output directory					[required]
@@ -89,7 +91,6 @@ manticore \\
   --threads		Number of parallel threads				[1]
   --cleanup		Delete heavy intermediate files at the end		[off]
   --filter-reference    Don't process sequences shorter than --window-size      [off]
-  --read-type           'PE' (paired-end) or 'SE' (single-end)                  [PE]
   --isize-read-num      Read pairs to use in insert size distribution           [10000]
   --isize-dist-width    Width of the allowed insert size range                  [150]
   --hisat2-path		Path to hisat2 executable				[hisat2]
@@ -131,6 +132,11 @@ manticore \\
   --reads		SPACE-separated list of read files (separate files of read pairs by comma)
 			Example: --reads G1.read_1.fq,G1.read_2.fq G2.read_1.fq,G2.read_2.fq ...
 			[required]
+
+  --reads-type	Specify either 'PE' for paired-end reads or 'SE' for single-end reads.
+  				Note that this affects the [--reads] argument too, since in case of
+				single-end reads you will have to specify only one file per parent
+				[PE]
 
   --names		SPACE-separated list of names corresponding to read files
 			Example: --names Subgenome_A Subgenome_B Subgenome_C ...
@@ -212,9 +218,6 @@ manticore \\
 			specified --window-size
 			[off]
 
-  --read-type		Specify \'PE\' (paired-end) or \'SE\' (single-end)
-			[PE]
-
   --isize-read-num	Number of read pairs from which to estimate the insert size distribution
 			[10000]
 
@@ -253,6 +256,7 @@ p.add_argument("--names", nargs="*", type=str, required=True)
 p.add_argument("--reference", type=str, required=True)
 p.add_argument("--output-dir", type=str, required=True)
 # optional
+p.add_argument("--reads-type", choices=["SE", "PE"], default="PE", type=str)
 p.add_argument("--version", action="store_true", default=False)
 p.add_argument("--restart", action="store_true", default=False)
 p.add_argument("--filter-reference", action="store_true", default=False)
@@ -260,7 +264,6 @@ p.add_argument("--max-mem", type=str, default="4G")
 p.add_argument("--threads", type=int, default=4)
 p.add_argument("--cleanup", action="store_true", default=False)
 # mapping
-p.add_argument("--read-type", choices=["SE", "PE"], type=str, default="PE")
 p.add_argument("--hisat2-map-pars", default="-k 5 --score-min L,0.0,-0.6 --mp 6,2 --rdg 5,3 --rfg 5,3 --no-softclip --no-spliced-alignment")
 p.add_argument("--isize-read-num", default=10000, type=int)
 p.add_argument("--isize-dist-width", default=150, type=int)
@@ -533,7 +536,7 @@ def check_if_reads_were_mapped(outdir, name):
 		return False
 
 
-def map_reads( 	hisat2_index, Reads, read_type, mapping_pars, \
+def map_reads( 	hisat2_index, Reads, reads_type, mapping_pars, \
 		hisat2_path, isize_file, outdir, threads):
 
 	if os.path.exists("{0}.1.ht2l".format(hisat2_index)) == True:
@@ -541,7 +544,7 @@ def map_reads( 	hisat2_index, Reads, read_type, mapping_pars, \
 	else:
 		index_type = ""
 
-	if read_type == "PE":
+	if reads_type == "PE":
 
 		# read insert sizes
 		INPUT = open(isize_file, "r")
@@ -574,7 +577,7 @@ def map_reads( 	hisat2_index, Reads, read_type, mapping_pars, \
 				if code != 0:
 					break
 
-	elif read_type == "SE":
+	elif reads_type == "SE":
 
 		for name in Reads.keys():
 
@@ -1328,7 +1331,7 @@ if __name__ == "__main__":
 
 
 		### estimate insert size ###
-		if args.read_type == "PE":
+		if args.reads_type == "PE":
 			# no counter cause it works within reads anyway
 			outdir = "{0}/{1}_reads/isize_estimation".format(args.output_dir, counter)
 			donefile = "{0}/isize_estimation.done".format(outdir)
@@ -1359,7 +1362,14 @@ if __name__ == "__main__":
 			else:
 				sys.stderr.write("[{0}] ins. size already estimated (skipping step)\n".format(at()))
 
-		isize_file = "{0}/{1}_reads/isize_estimation/isize_ranges.table".format(args.output_dir, counter)
+			isize_file = "{0}/{1}_reads/isize_estimation/isize_ranges.table".format(args.output_dir, counter)
+
+		elif args.reads_type == "SE":
+			# in this case we don't need to estimate insert size, because there
+			# is no insert
+			# so we skip the step
+
+			isize_file = None
 
 
 		### map reads ####
@@ -1375,7 +1385,7 @@ if __name__ == "__main__":
 			Reads = generate_reads_dictionary(args.reads, args.names)
 			status = map_reads(	hisat2_index,
 						Reads,
-						args.read_type,
+						args.reads_type,
 						args.hisat2_map_pars,
 						args.hisat2_path,
 						isize_file,
