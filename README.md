@@ -1,6 +1,6 @@
 ![GitHub Logo](logo.png)
 
-#### <v1.0.0>
+#### <v1.0.1>
 
 ## About
 
@@ -19,14 +19,14 @@ Manticore depends on a series of external resources, which are summarized in the
 | Resource | Type | Version | Source |
 |-|-|-|-|
 | Python | Language interpreter | ≥ 3.5 | https://www.python.org/downloads |
-| R | Language interpreter | ≥ 3.2.3 | https://www.r-project.org |
+| R | Language interpreter | ≥ 3.6.0 | https://www.r-project.org |
 | HISAT2 | Mapping program | ≥ 2.1.0 | https://github.com/DaehwanKimLab/hisat2 |
 | Biopython | Python package | ≥ 1.73 | python3.6 -m pip install biopython |
 | pysam | Python package | ≥ 0.15.3 | python3.6 -m pip install pysam |
 | numpy | Python package | ≥ 1.17.3 | python3.6 -m pip install numpy |
 | pandas | Python package | ≥ 1.0.3 | python3.6 -m pip install pandas |
 | dask | Python package | ≥ 2.12.0 | python3.6 -m pip install "dask[complete]" |
-| ggplot2 | R package | ≥ 3.2.1 | https://ggplot2.tidyverse.org/ |
+| ggplot2 | R package | ≥ 3.3.2 | https://ggplot2.tidyverse.org/ |
 
 </bg>
 
@@ -144,7 +144,7 @@ This word will be used as a prefix for many files throughout the analysis. It is
 
 `--reads`<br/>
 SPACE-separated list of paired-end read files. Each SPACE should separate reads from different parents, while the two read files (R1 and R2) of the same parent should be separated by a COMMA (without a following space). An example is provided here: Par_1.R1.fq,Par_1.R2.fq Par_2.R1.fq,Par_2.R2.fq
-In case of single-end reads, ignore the comma separation and only provide the two parental file separated by a space. 
+In case of single-end reads, ignore the comma separation and only provide the two parental file separated by a space.
 [mandatory]
 
 `--reads-type`<br/>

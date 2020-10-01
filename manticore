@@ -4,7 +4,7 @@
 VERSION = '''
 
 MANTICORE
-v 1.0.0
+v 1.0.1
 --------------------------------------------------------
 Matteo Schiavinato, Alexandrina Bodrug
 BOKU - University of Natural Resources and Life Sciences
@@ -1052,7 +1052,7 @@ def run_fraction_plot(	outdir, matrix, R_path, region, \
 	'xlab("") + ',
 	'ylab("Represented genome portions [%]") +',
 	'geom_bar(data=y, mapping=aes(x=Labels, y=Values, fill=Labels), width=0.45,',
-	'	  stat="identity", position=position_dodge(), show_guide = FALSE) +',
+	'	  stat="identity", position=position_dodge(), show.legend = FALSE) +',
 	'scale_x_discrete(labels=Portion_labels) +',
 	'scale_y_continuous(limits=c(0,100)) +',
 	'scale_fill_manual(values=Portion_colors) + ',
