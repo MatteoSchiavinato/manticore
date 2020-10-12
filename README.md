@@ -1,4 +1,4 @@
-![GitHub Logo](logo.png)
+![GitHub Logo](/images/logo.png)
 
 #### <v1.0.1>
 

@@ -1,4 +1,4 @@
-![GitHub Logo](logo.png)
+..  image:: /images/logo.png
 
 #### <v1.0.1>
 
@@ -163,7 +163,7 @@ FASTA file where to assess genomic intermixing. This is the FASTA file correspon
 All files will be produced within this directory. It is suggested not to use the current (“.”), as many folders will be produced and they may unluckily overlap with folders that are already existing in current (“.”).
 [mandatory]
 
-`--region-beds`<br/>  
+`--region-beds`<br/>
 SPACE-separated list of BED files with regions that have to be considered. For each BED file (and the corresponding name specified in `--region-names`) a separate line of analysis will be run, eventually leading to a separate set of plots and tables. If no BED file is specified, the program will consider all the genome.
 [-]
 
