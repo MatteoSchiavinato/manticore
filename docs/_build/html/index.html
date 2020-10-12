@@ -1,0 +1,115 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manticore documentation &#8212; manticore 1.0.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="manticore-documentation">
+<h1>Manticore documentation<a class="headerlink" href="#manticore-documentation" title="Permalink to this headline">¶</a></h1>
+<p><strong>Manticore</strong> addresses the subgenomic intermixing state of a hybrid, allopolyploid genome. The user provides a reference FASTA file for the hybrid species and short illumina reads from its two parental species. Manticore studies the coverage profiles obtained from each parent and extracts a series of metrics in intervals of adjustable size.</p>
+<p>The provided metrics indicate how conserved the subgenomes are when compared to their parental sequences. They also indicate how reshuffled the two subgenomes are, a metric we define as <strong>subgenomic intermixing</strong> and we address extensively in the associated publication (<strong>submitted</strong>).</p>
+<p>The user may use <strong>Manticore</strong> as collateral information when studying the genome of a hybrid species. In fact, the only necessary data for the tool to run are a hybrid genome in FASTA format and parental reads in FASTQ format. Especially when working with complex genomes such as those of plants, we recommend the usage of our tool to address the subgenomic conservation and intermixing state.</p>
+<p><strong>Manticore</strong> produces all its output inside the user-declared <cite>–output-dir</cite>. Inside this folder, six subdirectories are found, numerically ordered by time of creation. Folders <cite>1_</cite> to <cite>4_</cite> contain only intermediate files, and can be disregarded unless the user wants to address anything specifically related to <strong>bam</strong> or <strong>depth</strong> files. The results are provided in the <cite>5_</cite> and <cite>6_</cite> subdirectories. The tables and metrics are provided within the <cite>5_tables</cite> subdirectory. The plots are found within the <cite>6_plots</cite> subdirectory. The plots are provided both in <em>svg</em> and <em>png</em> format, together with the <em>R</em> scripts used to generate them. This allows the users to tweak the plot to their liking.</p>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">manticore</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Matteo Schiavinato, Alexandrina Bodrug-Schepers.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
