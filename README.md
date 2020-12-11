@@ -26,8 +26,8 @@ Manticore depends on a series of external resources, which are summarized in the
 | numpy | Python package | ≥ 1.17.3 | python3.6 -m pip install numpy |
 | pandas | Python package | ≥ 1.0.3 | python3.6 -m pip install pandas |
 | dask | Python package | ≥ 2.12.0 | python3.6 -m pip install "dask[complete]" |
-| ggplot2 | R package | ≥ 3.3.2 | https://ggplot2.tidyverse.org/ |
-
+| ggplot2 | R package | ≥ 3.3.2 | https://ggplot2.tidyverse.org |
+| reshape2 | R package | ≥ 1.4.4 | https://cran.r-project.org/web/packages/reshape2 |
 </bg>
 
 *HISAT2* (Kim et al., 2015) is used as an external software for the read mapping, and *R* is used for the plots generation. These programs are automatically searched in the `$PATH`, and if not found, an error is raised. A user can however specify the path to the executable of each one of them (see command line options), which will override the `$PATH` search.
