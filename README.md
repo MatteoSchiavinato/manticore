@@ -1,12 +1,29 @@
 ![GitHub Logo](/images/logo.png)
 
-#### <v1.0.1>
+#### <v1.0.2>
 
 ## About
 
 **Manticore** addresses the subgenomic intermixing state of a hybrid, allopolyploid genome. The user provides a reference FASTA file for the hybrid species and short illumina reads from its two parental species. Manticore studies the coverage profiles obtained from each parent and extracts a series of metrics in intervals of adjustable size.
 
-The provided metrics indicate how conserved the subgenomes are when compared to their parental sequences. They also indicate how reshuffled the two subgenomes are, a metric we define as **subgenomic intermixing** and we address extensively in the associated publication (**submitted**).
+##### Input
+
+- Illumina short reads from the parental species of a hybrid
+- FASTA reference genome sequence of the hybrid
+
+##### Output
+
+- tables: representing coverage, shared coverage, and candidate subgenome intermixing regions in windows of adjustable size
+- plots: repesenting graphically this outcome based on colored dotplots
+
+##### Example plot
+
+As from [Schiavinato et al., 2021](https://doi.org/10.1111/tpj.15190):
+
+![Sample plot](https://onlinelibrary.wiley.com/cms/asset/7d570254-f20c-42d1-b7d5-62b7566dfbe5/tpj15190-fig-0002-m.jpg)
+
+
+The provided metrics indicate how conserved the subgenomes are when compared to their parental sequences. They also indicate how reshuffled the two subgenomes are, a metric we define as **subgenomic intermixing** and we address extensively in the associated publication ([Schiavinato et al., 2021](https://doi.org/10.1111/tpj.15190)).
 
 The user may use **Manticore** as collateral information when studying the genome of a hybrid species. In fact, the only necessary data for the tool to run are a hybrid genome in FASTA format and parental reads in FASTQ format. Especially when working with complex genomes such as those of plants, we recommend the usage of our tool to address the subgenomic conservation and intermixing state.
 
