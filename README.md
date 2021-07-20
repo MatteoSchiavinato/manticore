@@ -116,7 +116,7 @@ Each line represents a window in a certain sequence (columns `Scaffold`, `W_star
 
 The `Real_length` column indicates the number of positions within said window that were overlapping the BED file indicated in column `Feature`. If no BED file was passed, real length shall be the same length as `W_end - W_start + 1`.
 
-The `Jaccard` column contains the computed Jaccard index between the coverage profiles of the two parents within the window; details on this computation can be found in the associated publication (**submitted**). The `Subgenome` column shows which parental coverage profile does the line correspond to.
+The `Jaccard` column contains the computed Jaccard index between the coverage profiles of the two parents within the window; details on this computation can be found in the associated publication ([Schiavinato et al., 2021](https://doi.org/10.1111/tpj.15190)). The `Subgenome` column shows which parental coverage profile does the line correspond to.
 
 The `Cov_pos`, `Frac_pos` and `Mean_cov` columns show, respectively: the number of covered positions; the fraction of covered positions (in %), the mean coverage of the window.
 
