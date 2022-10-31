@@ -3,20 +3,21 @@
 # version
 VERSION = '''
 
+--------------------------------------------------------------------------------
 MANTICORE
-v 1.0.2
---------------------------------------------------------
+v 1.0.3
+--------------------------------------------------------------------------------
 Matteo Schiavinato, Alexandrina Bodrug
-BOKU - University of Natural Resources and Life Sciences
-Department of Biotechnology
-Institute of Computational Biology
-Vienna (AT)
---------------------------------------------------------
-git@github.com:MatteoSchiavinato/manticore.git
+BSC - Barcelona Supercomputing Center, Barcelona, Spain
+BOKU - University of Natural Resources and Life Sciences, Vienna, Austria
+--------------------------------------------------------------------------------
 
 '''
 
 # modules
+import os
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
+
 import pandas as pd
 import dask
 import dask.dataframe as dd
@@ -25,7 +26,6 @@ import argparse as ap
 import time
 from time import asctime as at
 import sys
-import os
 from shutil import copyfile
 import os.path
 from operator import itemgetter
@@ -43,7 +43,7 @@ start_time = time.time()
 if len(sys.argv) == 1:
     sys.argv.append("-h")
 
-if sys.argv[1] == "-h":
+if sys.argv[1] in ["-h", "--help", "-help", "getopt", "usage"]:
     sys.exit('''{0}
 
 
@@ -51,199 +51,56 @@ if sys.argv[1] == "-h":
 
 
 Usage:
-manticore \\
---species-name STRING \\
---reads-type PE \\
---reads PATH1,PATH2 PATH3,PATH4 \\
+manticore \
+--species-name STRING \
+--reads-type PE \
+--reads PATH1,PATH2 PATH3,PATH4 \
         (parentA)   (parentB)
---names STRING STRING \\
+--names STRING STRING \
         (A)    (B)
---reference PATH \\
---output-dir PATH \\
+--reference PATH \
+--output-dir PATH \
 [ ... other options ... ]
 
 
 [INPUT OPTIONS]
-  --species-name    Label for output files and plot titles            [required]
-  --reads        FASTQ read files, see --help for how to structure    [required]
-  --reads-type        Type of the input reads (PE|SE)             [PE]
-  --names        Names of read files, see --help for how to structure    [required]
-  --reference        Hybrid genome in FASTA format                [required]
-  --output-dir        Output directory                    [required]
-  --region-beds        Regions to use in analysis, see --help for details    [-]
-  --region-names    Names to use for each file in --region-beds        [-]
+  --species-name        Label for output files and plot titles                  [required]
+  --reads               FASTQ read files, see --help for how to structure       [required]
+  --reads-typ           Type of the input reads (PE|SE)                         [PE]
+  --names               Names of read files, see --help for how to structure    [required]
+  --reference           Hybrid genome in FASTA format                           [required]
+  --output-dir          Output directory                                        [required]
+  --region-beds         Regions to use in analysis, see --help for details      [-]
+  --region-names        Names to use for each file in --region-beds             [-]
 
 [COVERAGE ANALYSIS]
-  --window-size        Size of the intermixing windows (in bp)            [500000]
-  --n-breaks        Number of window breaks for Jaccard distance        [10]
-  --min-feat-length    Min. window positions contained in a --region-bed    [1000]
-  --min-frac-pos    Min. fraction of positions covered            [0.1]
-  --min-cov-pos        Min. number of window positions with coverage        [1000]
-  --min-cov        Min. coverage to retain position            [1]
+  --window-size         Size of the intermixing windows (in bp)                 [500000]
+  --n-breaks            Number of window breaks for Jaccard distance            [10]
+  --min-feat-length     Min. window positions contained in a --region-bed       [1000]
+  --min-frac-pos        Min. fraction of positions covered                      [0.1]
+  --min-cov-pos         Min. number of window positions with coverage           [1000]
+  --min-cov             Min. coverage to retain position                        [1]
 
 [TABLES & PLOTTING]
-  --exclude        Sequence names to exclude from the analysis        [-]
+  --exclude             Sequence names to exclude from the analysis             [-]
   --max-jacc-uniq       Max. Jaccard distance for uniquely assigned window      [0.5]
-  --max-plot-cov    Upper limit for coverage plot                [100]
+  --max-plot-cov        Upper limit for coverage plot                           [100]
 
 [MISCELLANEOUS]
-  --max-mem        Gigabytes of RAM allowed                [4G]
-  --threads        Number of parallel threads                [1]
-  --cleanup        Delete heavy intermediate files at the end        [off]
+  --max-mem             Gigabytes of RAM allowed                                [4G]
+  --threads             Number of parallel threads                              [1]
+  --cleanup             Delete heavy intermediate files at the end              [off]
   --filter-reference    Don't process sequences shorter than --window-size      [off]
   --isize-read-num      Read pairs to use in insert size distribution           [10000]
   --isize-dist-width    Width of the allowed insert size range                  [150]
-  --hisat2-path        Path to hisat2 executable                [hisat2]
-  --hisat2-map-pars    Mapping parameters passed to hisat2            [--score-min L,0.0,-0.6
-            (consult hisat2 help)                    --no-softclip
-                                        --no-spliced-alignment]
+  --hisat2-path         Path to hisat2 executable                               [hisat2]
+  --hisat2-map-pars     Mapping parameters passed to hisat2                     [--score-min L,0.0,-0.6
+                                                                                --no-softclip
+                                                                                --no-spliced-alignment]
   --samtools-filters    Arguments to pass to samtools view                      [-F 0x4 -F 0x0100]
-  --rscript-path    Path to Rscript executable                [Rscript]
-  --version        Print version of Manticore and exit            [off]
-  --restart        Restart whole pipeline from the beginning        [off]
-
-'''.format(VERSION))
-
-if sys.argv[1] in ["-h", "--help", "-help", "getopt", "usage"]:
-    sys.exit('''
-
-  {0}
-
-
-Usage:
-manticore \\
---species-name STRING \\
---reads PATH1,PATH2 PATH3,PATH4 \\
-        (parentA)   (parentB)
---names STRING STRING \\
-        (A)    (B)
---reference PATH \\
---output-dir PATH \\
-[ ... other options ... ]
-
-
-
-[INPUT OPTIONS]
-
-  --species-name    Name of the hybrid species studied, to be used for plotting
-            (No whitespaces)
-            [required]
-
-  --reads        SPACE-separated list of read files (separate files of read pairs by comma)
-            Example: --reads G1.read_1.fq,G1.read_2.fq G2.read_1.fq,G2.read_2.fq ...
-            [required]
-
-  --reads-type    Specify either 'PE' for paired-end reads or 'SE' for single-end reads.
-                  Note that this affects the [--reads] argument too, since in case of
-                single-end reads you will have to specify only one file per parent
-                [PE]
-
-  --names        SPACE-separated list of names corresponding to read files
-            Example: --names Subgenome_A Subgenome_B Subgenome_C ...
-            [required]
-
-  --reference        FASTA file where to assess subgenomic intermixing
-            [required]
-
-  --output-dir        All files will be generated within this directory
-            [required]
-
-  --region-beds        SPACE-separated list of BED files with regions that have to be considered
-            (A separate coverage analysis will be generated for each one)
-            [-]
-
-  --region-names    SPACE-separated list of names to associate to BED files which should
-            define the type of data they contain
-            (Example: \'CDS\', \'nonrep\', ...)
-            (These names are only used as labels)
-            [-]
-
-
-[COVERAGE ANALYSIS]
-
-  --window-size        Size of the windows on which to study intermixing
-            (Hint: the larger, the more intermixing is observed, but the more data is lost)
-            [500000]
-
-  --n-breaks        Number of window breaks to compute Jaccard distance from.
-            [--window-size] divided by [--n-breaks] has to return an integer
-            (Hint: the smaller, the more likely intermixing is observed)
-            [10]
-
-  --min-feat-length    Minimum length of annotated features within windows of size --window-size.
-            This applies SEPARATELY to all annotations provided with --region-beds.
-            [1000]
-
-  --min-frac-pos    Minimum fraction of positions that have to be covered within the --min-feat-length
-            of a window.
-            [0.1]
-
-  --min-cov-pos        Minimum number of positions that have to be covered within a window.
-            [1000]
-
-  --min-cov        Minimum position coverage to consider a position in the analysis
-            [1]
-
-
-[TABLES & PLOTTING]
-
-  --exclude        Sequence names to exclude from the analysis. The result tables will be generated for
-            all sequences, and then they will be filtered removing lines (i.e. windows) corresponding
-            to these sequences (Hint: remove sequenecs that are not clearly assigned to a subgenome).
-            [off]
-
-  --max-jacc-uniq    Genome intervals are assigned to one parent specifically (i.e. low intermixing regions)
-            based on the Jaccard distance produced in the interval. Intervals producing a
-            Jaccard distange > [--max-jacc-uniq] are not considered low-intermixing.
-            (Hint: This value ranges from 0 to 1)
-            [0.5]
-
-  --max-plot-cov    The final plots will be limited to this maximum coverage
-            [100]
-
-
-[MISCELLANEOUS]
-
-  --max-mem        Maximum memory that can be used by the program (use only \'#G\')
-            (N threads will get \'--maxmem / N\' memory each)
-            [4G]
-
-  --threads        Number of parallel threads
-            [4]
-
-  --cleanup        Heavy intermediate files are deleted when the program has finished
-            [off]
-
-  --filter-reference    The reference file is filtered, keeping only sequences longer than the
-            specified --window-size
-            [off]
-
-  --isize-read-num    Number of read pairs from which to estimate the insert size distribution
-            [10000]
-
-  --isize-dist-width    Width of the allowed insert size range when mapping
-            (-I <x-N> -X <x+N> where x=avg.TLEN from mapping of --isize-read-num reads)
-            [150]
-
-  --hisat2-path        Path to the \"HISAT2\" executable (only specify if not present in the `$PATH`)
-            [hisat2]
-
-  --hisat2-map-pars    Mapping parameters to be passed to HISAT2
-            [-k 5 --score-min L,0.0,-0.6 --mp 6,2 --rdg 5,3 --rfg 5,3 --no-softclip --no-spliced-alignment]
-
-  --samtools-filters    Arguments to pass to samtools view
-            [-F 0x0100 -F 0x4]
-
-  --rscript-path    Path to the \"Rscript\" executable (only specify if not present in the `$PATH`)
-            [Rscript]
-
-  --version        Print version of the program and exit
-            [off]
-
-  --restart        Restart whole pipeline from the beginning, ignoring *.done files
-            (each directory contains a *.done file that signals to skip the step)
-            [off]
-
+  --rscript-path        Path to Rscript executable                              [Rscript]
+  --version             Print version of Manticore and exit                     [off]
+  --restart             Restart whole pipeline from the beginning               [off]
 
 '''.format(VERSION))
 
