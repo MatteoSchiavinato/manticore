@@ -33,7 +33,6 @@ from itertools import combinations
 import subprocess
 from math import floor, ceil
 from Bio import SeqIO
-import resource
 
 start_time = time.time()
 
@@ -51,22 +50,13 @@ if sys.argv[1] in ["-h", "--help", "-help", "getopt", "usage"]:
 
 
 Usage:
-manticore \
---species-name STRING \
---reads-type PE \
---reads PATH1,PATH2 PATH3,PATH4 \
-        (parentA)   (parentB)
---names STRING STRING \
-        (A)    (B)
---reference PATH \
---output-dir PATH \
-[ ... other options ... ]
+manticore --threads <N> --species-name <str> --reads <A1>,<A2> <B1>,<B2> --names <str> <str> --reference <path> --output-dir <path> [options]
 
 
 [INPUT OPTIONS]
   --species-name        Label for output files and plot titles                  [required]
   --reads               FASTQ read files, see --help for how to structure       [required]
-  --reads-typ           Type of the input reads (PE|SE)                         [PE]
+  --reads-type          Type of the input reads (PE|SE)                         [PE]
   --names               Names of read files, see --help for how to structure    [required]
   --reference           Hybrid genome in FASTA format                           [required]
   --output-dir          Output directory                                        [required]
@@ -87,8 +77,8 @@ manticore \
   --max-plot-cov        Upper limit for coverage plot                           [100]
 
 [MISCELLANEOUS]
-  --max-mem             Gigabytes of RAM allowed                                [4G]
   --threads             Number of parallel threads                              [1]
+  --max-mem             Gigabytes of RAM allowed                                [768M]
   --cleanup             Delete heavy intermediate files at the end              [off]
   --filter-reference    Don't process sequences shorter than --window-size      [off]
   --isize-read-num      Read pairs to use in insert size distribution           [10000]
@@ -117,8 +107,8 @@ p.add_argument("--reads-type", choices=["SE", "PE"], default="PE", type=str)
 p.add_argument("--version", action="store_true", default=False)
 p.add_argument("--restart", action="store_true", default=False)
 p.add_argument("--filter-reference", action="store_true", default=False)
-p.add_argument("--max-mem", type=str, default="4G")
 p.add_argument("--threads", type=int, default=4)
+p.add_argument("--max-mem", type=str, default="4G")
 p.add_argument("--cleanup", action="store_true", default=False)
 # mapping
 p.add_argument("--hisat2-map-pars", default="-k 5 --score-min L,0.0,-0.6 --mp 6,2 --rdg 5,3 --rfg 5,3 --no-softclip --no-spliced-alignment")
@@ -144,12 +134,6 @@ args = p.parse_args()
 
 
 ### functions ###
-
-def memory_limit(user_limit):
-    soft, hard = resource.getrlimit(resource.RLIMIT_AS)
-    hard_limit = min(float(hard), float(user_limit))
-    resource.setrlimit(resource.RLIMIT_AS, (get_memory() * 1024 / 2, hard_limit))
-
 
 def get_memory():
     with open('/proc/meminfo', 'r') as mem:
@@ -558,41 +542,48 @@ def filter_coverage_file(cov_dir, Names, Beds, min_cov):
 
     code = 0
     if int(min_cov) > 1:
-
         for name in Names:
-            for region in Beds.keys():
-                code = 0
-                try:
-                    raw_cov_file = "{0}/{1}.{2}.depth".format(cov_dir, name, region)
-                    dest_cov_file = "{0}/{1}.{2}.{3}x.depth".format(cov_dir, name, region, min_cov)
+            if len(Beds) > 0:
+                Regions = Beds.keys()
+            else:
+                Regions = ["whole"]
+                for region in Regions:
+                    code = 0
+                    try:
+                        raw_cov_file = "{0}/{1}.{2}.depth".format(cov_dir, name, region)
+                        dest_cov_file = "{0}/{1}.{2}.{3}x.depth".format(cov_dir, name, region, min_cov)
 
-                    INPUT = open(raw_cov_file, "r")
-                    OUTPUT = open(dest_cov_file, "w")
+                        INPUT = open(raw_cov_file, "r")
+                        OUTPUT = open(dest_cov_file, "w")
 
-                    for line in INPUT:
-                        lst = line.rstrip("\b\r\n").split("\t")
-                        if int(lst[2]) >= int(min_cov):
-                            OUTPUT.write(line)
-                    INPUT.close()
-                    OUTPUT.close()
-                except:
-                    code = 1
+                        for line in INPUT:
+                            lst = line.rstrip("\b\r\n").split("\t")
+                            if int(lst[2]) >= int(min_cov):
+                                OUTPUT.write(line)
+                        INPUT.close()
+                        OUTPUT.close()
+                    except:
+                        code = 1
+                        break
+                if code != 0:
                     break
-            if code != 0:
-                break
     else:
         for name in Names:
-            for region in Beds.keys():
-                code = 0
-                try:
-                    raw_cov_file = "{0}/{1}.{2}.depth".format(cov_dir, name, region)
-                    dest_cov_file = "{0}/{1}.{2}.{3}x.depth".format(cov_dir, name, region, min_cov)
-                    os.rename(raw_cov_file, dest_cov_file)
-                except:
-                    code = 1
+            if len(Beds) > 0:
+                Regions = Beds.keys()
+            else:
+                Regions = ["whole"]
+                for region in Regions:
+                    code = 0
+                    try:
+                        raw_cov_file = "{0}/{1}.{2}.depth".format(cov_dir, name, region)
+                        dest_cov_file = "{0}/{1}.{2}.{3}x.depth".format(cov_dir, name, region, min_cov)
+                        os.rename(raw_cov_file, dest_cov_file)
+                    except:
+                        code = 1
+                        break
+                if code != 0:
                     break
-            if code != 0:
-                break
     if code == 0:
         return True
     else:
@@ -696,14 +687,25 @@ def filter_tables(species_name, tables_dir, Regions, Names, Excluded_sequences):
         x = x[~x["Sequence"].isin(Excluded_sequences)]
         x.to_csv(outfile, sep="\t", index=False)
 
-        for region in Regions:
+        if Regions != None:
+            for region in Regions:
+                for name in Names:
+                    infile = "{0}/{1}.{2}.{3}.txt".format(tables_dir, species_name, name, region)
+                    outfile = "{0}/RES.{1}.{2}.{3}.txt".format(tables_dir, species_name, name, region)
+                    x = pd.read_csv(infile, sep="\t")
+                    x = x[~x["Sequence"].isin(Excluded_sequences)]
+                    x.to_csv(outfile, sep="\t", index=False)
+            return True
+
+        else:
+            region = "whole"
             for name in Names:
                 infile = "{0}/{1}.{2}.{3}.txt".format(tables_dir, species_name, name, region)
                 outfile = "{0}/RES.{1}.{2}.{3}.txt".format(tables_dir, species_name, name, region)
                 x = pd.read_csv(infile, sep="\t")
                 x = x[~x["Sequence"].isin(Excluded_sequences)]
                 x.to_csv(outfile, sep="\t", index=False)
-        return True
+            return True
 
     except:
         return False
@@ -712,6 +714,10 @@ def filter_tables(species_name, tables_dir, Regions, Names, Excluded_sequences):
 def generate_metrics_file(species_name, output_dir, tables_dir, Regions, Names, max_jacc_uniq, output_file, window_size):
 
     status = False
+
+    if Regions == None:
+        Regions = ["whole"]
+
     Metrics = { region:{} for region in Regions }
 
     for region in Regions:
@@ -1015,7 +1021,13 @@ def run_jaccard_plot(outdir, matrix, R_path, region, species_name):
 def generate_plots(outdir, R_path, tables_dir, Names, Beds, species_name, maxcov, window_size):
 
     Codes = []
-    for region in Beds.keys():
+
+    if len(Beds) == 0:
+        Regions = ["whole"]
+    else:
+        Regions = Beds.keys()
+
+    for region in Regions:
         name = Names[0]
         matrix = "{0}/RES.{1}.{2}.{3}.txt".format(tables_dir, species_name, name, region)
         Codes.append(run_fraction_plot(    outdir, matrix, R_path, region, \
@@ -1087,11 +1099,6 @@ if __name__ == "__main__":
     cwd = os.getcwd()
     script_dir = sys.path[0]
     counter = 0
-
-    ### memory limit ###
-    maxmem = int(str(args.max_mem).strip("G"))*1e9
-    memory_limit(maxmem)
-    sys.stderr.write("[{0}] Set memory limit to: {1}G\n".format(at(), int(maxmem / 1e9)))
 
     try:
 
@@ -1293,13 +1300,14 @@ if __name__ == "__main__":
             # samtools sort uses more memory than the one per thread
             # so I set it to 90% of the one specified by the user
             # to account for this
-            maxmem = args.max_mem.strip("G")
+            mem_size_letter=args.max_mem[-1]
+            maxmem = args.max_mem.strip("GMK")
             adj_maxmem = float(maxmem) * 0.90
             thread_mem_val = float(adj_maxmem) / float(args.threads)
             if thread_mem_val < float(1):
                 thread_mem = "768M"
             else:
-                thread_mem = str(floor(thread_mem_val)) + "G"
+                thread_mem = str(floor(thread_mem_val)) + mem_size_letter
 
             sys.stderr.write("[{0}] Sorting with {1} threads and {2} per thread\n".format(at(), args.threads, thread_mem))
 
