@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
 ### modules ###
+import os
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
+
 from time import asctime as at
 import numpy as np
 import pandas as pd
@@ -10,7 +13,6 @@ from dask.distributed import Client
 import dask_distance as ddist
 import argparse as ap
 import sys
-import os
 from operator import itemgetter
 from itertools import combinations
 import shutil
@@ -551,7 +553,7 @@ def analyze_windows(df, args, region, break_len):
 
 		d = {}
 		d["Real_length"] = x["Real_length"].sum()
-		# parent 1 
+		# parent 1
 		d["Cov_pos_1"] = x["Cov_pos_1"].sum()
 		d["Frac_pos_1"] = x["Frac_pos_1"].mean()
 		# assign zero if there are no subintervals
@@ -721,11 +723,13 @@ if __name__ == "__main__":
 	sys.stderr.write("[{0}] Computing length of features within windows ... ".format(at()))
 
 	# real lengths are computed (See function for details)
-	if args.beds == None:
+	if (args.beds == None) and (args.beds_names == None):
+		Names = ["whole"]
 		Real_lengths = { "whole" : { scaf : { subinterval : break_len \
 				for subinterval in All_subintervals[scaf] } \
 				for scaf in All_subintervals.keys() } }
 	else:
+		Names = [i for i in args.beds_names]
 		Beds = { args.beds_names[i] : args.beds[i] for i in range(0, len(args.beds)) }
 		Real_lengths = {}
 		for region in Beds.keys():
@@ -747,7 +751,9 @@ if __name__ == "__main__":
 	# the analysis is performed region by region
 	# this means that if --args.beds was declared, the script proceeds one bed file at a time
 	# for each bed file, parents are analysed simultaneously
-	for region in args.beds_names:
+
+	for region in Names:
+	# for region in args.beds_names:
 
 		sys.stderr.write("[{0}] Working on region: {1}\n".format(at(), region))
 
